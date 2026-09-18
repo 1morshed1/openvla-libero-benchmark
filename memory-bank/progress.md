@@ -1,18 +1,21 @@
 # Progress
 
 ## Status
-**Phase 0 — early.** Research notebook scaffold + plan committed locally; no EXP logs, no env verification, no model runs recorded in-repo.
+**Phase 0 — off-hours prep done, GPU work pending.** Scaffold + plan + all paper notes committed and pushed to `origin/main`. No EXP logs, no env verification, no model runs yet.
 
 ## What works
 - [x] Project plan written (`plan/VLA-project-plan.md`).
 - [x] Research README with RQ, hypotheses, metrics, matrix (`research/README.md`).
-- [x] Empty research dirs: papers, experiments, notes, datasets, baselines, results, figures, weekly-log.
-- [x] Memory bank initialized.
+- [x] Research dirs + scaffold files, committed + pushed (`ea20a55`+).
+- [x] Paper notes: OpenVLA, OpenVLA-OFT, Octo, AutoVLA (off-road), Zhang apple-harvest — grounded, with verify-from-body flags.
+- [x] Frozen eval-protocol card exists (`research/datasets/libero-spatial-eval.md`) — values not yet frozen.
+- [x] EXP template + weekly-log W38.
+- [x] Root `.gitignore` (results JSON + figures kept tracked).
+- [x] Memory bank initialized + updated 2026-09-18.
 
 ## What's left (checklist from plan)
 - [ ] EXP-000: released checkpoint ~84.7% in sim → harness validated
-- [ ] Paper notes: OpenVLA, OpenVLA-OFT (+ Octo, off-road VLA, Zhang apple-harvest)
-- [ ] Frozen eval protocol doc (`research/datasets/libero-spatial-eval.md`)
+- [ ] Freeze eval-protocol values (tasks/seeds) in the card and never change
 - [ ] Metrics harness (5 metrics) built + reused
 - [ ] Arm A: LoRA fine-tune, merge bf16, EXP-001
 - [ ] Arm B int8 + Arm C int4 (EXP-002/003)
@@ -31,7 +34,7 @@
 ## Phase map
 | Phase | Goal | State |
 |-------|------|-------|
-| 0 | Env + REF EXP-000 + scaffold + core papers | Scaffold only |
+| 0 | Env + REF EXP-000 + scaffold + core papers | Scaffold + all papers done; env + EXP-000 pending |
 | 1 | Freeze harness + Arm A | Not started |
 | 2 | Quantize B/C(/D), fill table | Not started |
 | 3 | Write-up + figures + sim demo | Not started |

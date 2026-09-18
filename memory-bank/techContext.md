@@ -7,6 +7,8 @@
 | Home | RTX 2060, 6 GB | Notes, plots, draft only — no 7B |
 | Stretch | Jetson Xavier NX 8/16 GB | Phase 4 only |
 
+**Access:** office box = persistent disk, GPU fully dedicated, Sun–Thu 9–6 for interactive work, but **jobs may run unattended overnight/weekend** → launch long fine-tunes before leaving to use the Fri/Sat gap. Home box available anytime for CPU/writing.
+
 ## Software targets (office)
 - Linux; Python 3.10 (`conda` env `openvla`).
 - CUDA toolkit ≥ 12.8; driver recent (e.g. ≥570/580).
