@@ -1,0 +1,15 @@
+# Big artifacts stay out of git
+*.bin
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+checkpoints/
+merged/
+runs/
+adapter-tmp/
+wandb/
+*.mp4
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
