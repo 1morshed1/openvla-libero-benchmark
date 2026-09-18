@@ -1,0 +1,50 @@
+# --- Model weights / artifacts (never commit) ---
+*.bin
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+*.gguf
+checkpoints/
+merged/
+runs/
+adapter-tmp/
+
+# --- Datasets (keep the .md cards under research/datasets, ignore raw data) ---
+modified_libero_rlds/
+LIBERO/
+*.tfrecord
+*.hdf5
+/data/
+
+# --- Experiment tracking ---
+wandb/
+*.log
+
+# NOTE: research/results/*.json and research/figures/* ARE tracked
+# (small metric rows + paper figures = the paper's data). Do not ignore.
+
+# --- Large media ---
+*.mp4
+*.mov
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.ipynb_checkpoints/
+
+# --- Env / conda / venv ---
+.venv/
+venv/
+env/
+.env
+
+# --- Editor / OS ---
+.vscode/
+.idea/
+.DS_Store
+*.swp
