@@ -43,5 +43,6 @@ Copy `research/experiments/` template per run: hypothesis, config, hardware vers
 ## Repo layout pattern
 - `plan/` — execution plan.
 - `research/` — RQ, papers, experiments, results, figures, weekly-log.
+- `scripts/` — repo tooling: `phase0_bringup.sh` (gated env setup), `metrics.py` (5-metric harness §7), `train_arm_a.sh` (LoRA train + merge), `run_arm.sh` (eval + metrics → results JSON).
 - `memory-bank/` — agent continuity docs (this tree).
 - External clones (`~/vla/openvla`, LIBERO, datasets) live outside this repo unless later vendored.

@@ -11,13 +11,18 @@
 - [x] Frozen eval-protocol card exists (`research/datasets/libero-spatial-eval.md`) — values not yet frozen.
 - [x] EXP template + weekly-log W38.
 - [x] Root `.gitignore` (results JSON + figures kept tracked).
-- [x] Memory bank initialized + updated 2026-09-18.
+- [x] Memory bank initialized + updated 2026-09-19.
+- [x] Phase-0 bring-up script `scripts/phase0_bringup.sh` (gated env setup) committed + pushed.
+- [x] Metrics harness `scripts/metrics.py` (5 metrics §7) built; syntax/argparse verified on home box.
+- [x] Arm launch scripts: `scripts/train_arm_a.sh` (LoRA train + merge), `scripts/run_arm.sh` (eval + metrics → JSON row).
+- [x] Commit history scrubbed of AI attribution (force-pushed).
 
 ## What's left (checklist from plan)
+- [ ] Run bring-up script on office box: env + torch `(12,0)` + clones + MuJoCo EGL
 - [ ] EXP-000: released checkpoint ~84.7% in sim → harness validated
 - [ ] Freeze eval-protocol values (tasks/seeds) in the card and never change
-- [ ] Metrics harness (5 metrics) built + reused
-- [ ] Arm A: LoRA fine-tune, merge bf16, EXP-001
+- [x] Metrics harness (5 metrics) built (`scripts/metrics.py`) — reuse/verify on box
+- [ ] Arm A: LoRA fine-tune, merge bf16, EXP-001 (scripts ready: `train_arm_a.sh`/`run_arm.sh`)
 - [ ] Arm B int8 + Arm C int4 (EXP-002/003)
 - [ ] Results table A/B/C + degradation
 - [ ] Arm D GPTQ/AWQ (stretch), Arm E Jetson (stretch)
@@ -34,7 +39,7 @@
 ## Phase map
 | Phase | Goal | State |
 |-------|------|-------|
-| 0 | Env + REF EXP-000 + scaffold + core papers | Scaffold + all papers done; env + EXP-000 pending |
+| 0 | Env + REF EXP-000 + scaffold + core papers | Scaffold + papers + bring-up script done; run script + EXP-000 pending |
 | 1 | Freeze harness + Arm A | Not started |
 | 2 | Quantize B/C(/D), fill table | Not started |
 | 3 | Write-up + figures + sim demo | Not started |
