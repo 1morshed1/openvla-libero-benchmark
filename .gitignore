@@ -20,6 +20,10 @@ LIBERO/
 # --- Experiment tracking ---
 wandb/
 *.log
+*.out
+*.pid
+research/experiments/ref_full50*.pid
+research/experiments/ref_full50_nohup.out
 
 # NOTE: research/results/*.json and research/figures/* ARE tracked
 # (small metric rows + paper figures = the paper's data). Do not ignore.
