@@ -19,15 +19,18 @@
 - **No flash-attn** — SDPA attention in model-load / finetune sites.
 - bitsandbytes recent (sm_120 kernels) for int8/int4.
 - LIBERO + `experiments/robot/libero/libero_requirements.txt`.
-- MuJoCo: `MUJOCO_GL=egl`, `PYOPENGL_PLATFORM=egl` (fallback osmesa).
+- MuJoCo: **pin `mujoco==3.3.2`** (3.13 breaks robosuite 1.4.x; ≥3.4 drifts libero_spatial init settle). `MUJOCO_GL=egl`, `PYOPENGL_PLATFORM=egl`.
+- Install openvla with **`pip install -e . --no-deps`** then curated deps — never let pip pull `torch==2.2.0`.
+- protobuf: **6.31.1** currently needed for `tensorflow-metadata` / tfds import on this box (TF 2.15 warns).
 
 ## External repos / data
-- https://github.com/openvla/openvla — run path.
-- https://github.com/moojink/openvla-oft — read only.
-- https://github.com/Lifelong-Robot-Learning/LIBERO
+- https://github.com/openvla/openvla — run path (`~/vla/openvla`).
+- https://github.com/moojink/openvla-oft — read only (`~/vla/openvla-oft`).
+- https://github.com/Lifelong-Robot-Learning/LIBERO (`~/vla/LIBERO`).
 - HF dataset `openvla/modified_libero_rlds` (`libero_spatial_no_noops`, …).
 - Checkpoint REF: `openvla/openvla-7b-finetuned-libero-spatial`.
 - Base for LoRA: `openvla/openvla-7b`.
+- HF cache on this host: `$HF_HOME` → `/office/shared_cache/.cache/huggingface`.
 
 ## Eval protocol (to freeze in Phase 1)
 - Suite: `libero_spatial`.
