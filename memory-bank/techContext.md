@@ -3,11 +3,13 @@
 ## Hardware
 | Box | GPU | Role |
 |-----|-----|------|
-| Office | RTX PRO 6000 Blackwell, 96 GB | All train/eval/quantize |
+| Office (`vm-130-131`) | 3× RTX PRO 6000 Blackwell ~96 GB each | Train/eval/quantize — **this user: GPU-1 only** (`CUDA_VISIBLE_DEVICES=1`) |
 | Home | RTX 2060, 6 GB | Notes, plots, draft only — no 7B |
 | Stretch | Jetson Xavier NX 8/16 GB | Phase 4 only |
 
-**Access:** office box = persistent disk, GPU fully dedicated, Sun–Thu 9–6 for interactive work, but **jobs may run unattended overnight/weekend** → launch long fine-tunes before leaving to use the Fri/Sat gap. Home box available anytime for CPU/writing.
+**Access:** office box = persistent disk under `/office/dev_workspace/morshed`, shared machine (other GPUs in use). Sun–Thu interactive; **jobs may run unattended overnight/weekend**. Root LV expanded to **~2.0 TiB** on 2026-09-20 (~1.5 TiB free at check); still Docker-heavy on the shared host. Home box available anytime for CPU/writing.
+
+**Full rig notes:** `research/hardware-office-vm-130-131.md`.
 
 ## Software targets (office)
 - Linux; Python 3.10 (`conda` env `openvla`).
