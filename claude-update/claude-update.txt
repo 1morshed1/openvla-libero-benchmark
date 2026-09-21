@@ -1,0 +1,16 @@
+This is real progress — you've cleared all of Phase 0 and you're into the actual experiment. The one that matters is the **REF gate at 85.4%**: it sits right on top of the published 84.7% (the small excess is just device/run variance on Blackwell vs. the original A100), so your eval harness is trustworthy and everything downstream inherits that credibility. Also good to see you logged the TFRecord-shard rename as a landmine — that failure-mode logging is exactly the habit that makes the paper writeable in six months.
+
+Sanity check on the decisions in the files — all correct, nothing I'd change: base openvla (not OFT), the SDPA patch (your Blackwell fix), LoRA as object-of-study, eval frozen *before* training.
+
+A few things I'd watch while Arm A trains:
+
+- **You probably won't need all 50k steps.** On one GPU at eff-batch 128 with SDPA, 50k is likely a day or two of wall-clock, but LIBERO-Spatial success usually plateaus well before that. That's why your "eval intermediate adapters" step earns its keep — check the 15k/20k/25k checkpoints on a *reduced* dev set (10 trials/task, seed 7), and if it's already ~84–85% and flat, stop early and save a day. Don't run the step counter on principle.
+- **Confirm `center_crop True` and `unnorm_key=libero_spatial_no_noops` are baked into the frozen eval spec.** REF passing at 85.4% says they almost certainly are — but Arm A has to use the identical settings or the comparison silently breaks.
+- **W&B offline is fine** — just remember to `wandb sync` later; you'll want the loss curve as a paper figure.
+- Pick the best checkpoint on the *dev* subset, then run the *full* frozen protocol (50 trials × seeds {7,42,123}) only on that winner + REF — keeps the expensive eval to two runs.
+
+Your post-train ordering is right: eval intermediates → merge best to `arm-A-bf16` on GPU-1 → full Arm A eval → EXP-001 with the five metrics → then B/C reuse the same harness.
+
+One strategic note for when you reach the table (not now — finish Arm A first): the baseline/LoRA/quant table is your MVP and competence-demonstrator, but remember from the topic research that a bare LIBERO quant table isn't novel on its own anymore. The cheapest upgrade to a *paper* is one axis the crowd skips — **energy-per-action** or **robustness-under-perturbation** — same harness, one extra column. So from Arm B onward, instrument **power draw via NVML** alongside latency even on the workstation; that way you're not re-running everything later to get the energy numbers.
+
+Want me to draft the five-metric measurement harness now (NVML power included) so it's ready the moment Arm A merges — or the EXP-001 log entry pre-filled from these configs?

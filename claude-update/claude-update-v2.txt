@@ -1,0 +1,24 @@
+On it — both. First the reusable five-metric harness with NVML power baked in, then the pre-filled EXP-001 entry.Now the pre-filled EXP-001 entry.Both are below. Here's what you need to know to use them.
+
+**`measure.py`** → drop in `research/experiments/`. It measures latency, peak memory, model size, throughput, and **energy (J/action via NVML)** on a fixed deterministic input so the arms are comparable. Success rate stays separate — you pass it in from `run_libero_eval`. Usage once Arm A merges:
+
+```bash
+pip install nvidia-ml-py
+CUDA_VISIBLE_DEVICES=1 python research/experiments/measure.py \
+  --arm A --precision bf16 --checkpoint ~/vla/merged/arm-A-bf16 \
+  --success_rate <from run_libero_eval>
+# Arms B/C load the SAME merged dir, precision only changes:
+CUDA_VISIBLE_DEVICES=1 python research/experiments/measure.py --arm B --precision int8 --checkpoint ~/vla/merged/arm-A-bf16 ...
+CUDA_VISIBLE_DEVICES=1 python research/experiments/measure.py --arm C --precision int4 --checkpoint ~/vla/merged/arm-A-bf16 ...
+```
+
+Two things I want to flag because they'll bite silently:
+
+- **The NVML index gotcha.** Under `CUDA_VISIBLE_DEVICES=1`, torch sees your card as `cuda:0`, but NVML uses *physical* indices — so it must read physical index 1, or you'd be measuring the wrong GPU's power. The script auto-resolves this from `CUDA_VISIBLE_DEVICES`, but if you ever launch differently, pass `--nvml_index 1` explicitly.
+- **Verify two things against your patched repo:** the prompt template string (`"In: What action should the robot take to {}?\nOut:"`) and that int8/int4 loading via `BitsAndBytesConfig` matches how your `run_libero_eval` does it. If your eval script constructs quantization differently, mirror *its* path so the quantized arms are apples-to-apples with the success numbers.
+
+**`EXP-001.md`** → `research/experiments/`. Pre-filled from your two context files — hypothesis H1, the frozen protocol, all the hyperparameters, the SDPA and TFRecord-rename landmines, and the five-metric table stubbed out. Just fill the blanks after eval (there's a `bitsandbytes ___` version blank worth pinning now, since it matters for Blackwell).
+
+One reminder baked into both files: **start instrumenting energy from Arm B onward**, not after the table's done — that one extra column is the cheapest path from "reproduction table" to "paper the crowd didn't write," and re-running all arms later to get it would be a waste.
+
+Good place to stop for the day — Arm A's training while you sleep. When you're back and have intermediate checkpoints, I can help you read the dev-eval numbers and decide the early-stop call.
