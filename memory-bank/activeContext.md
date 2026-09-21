@@ -28,3 +28,5 @@ ls ~/vla/runs ~/vla/adapters
 
 ## Active decisions
 - Base openvla, LoRA object of study, GPU-1 only, mujoco 3.3.2, W&B offline.
+
+- **Landmine (fixed 2026-09-21):** after renaming folder/`dataset_info.name` to `libero_spatial_no_noops`, also rename TFRecord shards `libero_spatial-train.*` → `libero_spatial_no_noops-train.*` or TFDS NotFoundError.
