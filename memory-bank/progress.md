@@ -1,36 +1,33 @@
 # Progress
 
 ## Status
-**Phase 0 — REF smoke PASS.** Env + installs + MuJoCo EGL + released-ckpt smoke on GPU-1 done (**90%** @ 3 trials/task). Full 50-trial REF / formal ~84.7% gate and eval-protocol freeze still open.
+**Phase 1 — Arm A LoRA training underway (detached, GPU-1).** Phase 0 REF gate PASS (85.4%). Eval protocol frozen.
 
 ## What works
-- [x] Project plan, research scaffold, paper notes, scripts, memory bank (prior).
-- [x] Office: Miniconda + `openvla` env; torch 2.11.0+cu128; gate2 on **GPU-1**.
-- [x] Office: `~/vla/{openvla,openvla-oft,LIBERO}`; SDPA + Hub stats patches.
-- [x] openvla `--no-deps` + curated deps; LIBERO + robosuite; mujoco **3.3.2**.
-- [x] MuJoCo EGL gate5 + LIBERO env reset.
-- [x] REF smoke EXP-000: 27/30 = **90%** on `libero_spatial` (center_crop True).
-- [x] Rig notes: `research/hardware-office-vm-130-131.md`.
-- [x] Disk expanded (~2.0 TiB).
+- [x] Phase 0 env + REF full **85.4%** (EXP-000).
+- [x] Eval protocol frozen (`research/datasets/libero-spatial-eval.md`).
+- [x] Training data `libero_spatial_no_noops` on disk.
+- [x] Finetune SDPA patch; Arm A detached launcher.
+- [ ] Arm A train to completion (50k steps / early stop on best ckpt).
+- [ ] Merge + EXP-001 eval.
 
 ## What's left
-- [ ] Full REF: 50 trials/task → confirm ~84.7%; five metrics via `scripts/metrics.py`
-- [ ] Freeze `research/datasets/libero-spatial-eval.md`
-- [ ] Arm A LoRA train + merge + EXP-001
+- [ ] Finish Arm A train; pick best adapter; merge bf16
+- [ ] EXP-001 five metrics
 - [ ] Arms B/C (+ D/E stretch)
 - [ ] Results table, figures, paper, public README
 
 ## Known issues / risks
-- Do not let pip reinstall torch 2.2 / mujoco≥3.4 / flash-attn.
-- protobuf 6.31.1 vs TF 2.15 pin conflict — OK for eval import path; watch Arm A TF data pipeline.
-- EGL cleanup exceptions on env close — ignore if rollouts succeeded.
-- Merge LoRA on GPU-1 (same as eval).
+- Do not reinstall torch 2.2 / mujoco≥3.4 / flash-attn.
+- protobuf vs TF warnings — OK for now.
+- Shared GPU-1 contention — use detached launchers.
+- W&B offline (no cloud login).
 
 ## Phase map
 | Phase | Goal | State |
 |-------|------|-------|
-| 0 | Env + REF EXP-000 + scaffold | Smoke PASS; full REF pending |
-| 1 | Freeze harness + Arm A | Not started |
+| 0 | Env + REF EXP-000 | **DONE** |
+| 1 | Freeze harness + Arm A | Protocol frozen; **train running** |
 | 2 | Quantize B/C(/D) | Not started |
 | 3 | Write-up + figures | Not started |
 | 4 | Jetson E | Stretch |

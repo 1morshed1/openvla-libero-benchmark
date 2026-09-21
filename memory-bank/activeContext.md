@@ -1,44 +1,30 @@
 # Active Context
 
 ## Current focus
-Full REF (**50 trials/task**) **queued** on GPU-1: waiter polls until ≥70 GiB free, then launches. GPU-1 currently held by another user’s Ray/SFPO job (~72 GiB). Smoke EXP-000 already at 90% (3 trials).
-
-Wait/run logs under `research/experiments/ref_full50_*`.
+**Phase 1 in progress — Arm A LoRA training running detached on GPU-1.** Eval protocol frozen. EXP-000 REF gate passed (85.4%).
 
 ## Session constraint (hard)
-**GPU-1 only** — always `export CUDA_VISIBLE_DEVICES=1`. Never use GPU-0 or GPU-2.
+**GPU-1 only** — `CUDA_VISIBLE_DEVICES=1`.
 
-## Recent changes (2026-09-20, office `vm-130-131`)
-- Miniconda `~/miniconda3`, env `openvla` (Py 3.10); torch **2.11.0+cu128**; gate2 `(12,0)`+matmul on GPU-1.
-- `~/vla/{openvla,openvla-oft,LIBERO}` cloned; openvla installed via **`--no-deps`** + curated pins (transformers 4.40.1, tokenizers 0.19.1, timm 0.9.10, peft 0.11.1, bnb 0.50.2).
-- SDPA patches in openvla; Hub `dataset_statistics.json` fetch in `openvla_utils.py`.
-- LIBERO config `~/.libero/config.yaml`; `torch.load(..., weights_only=False)` for init states.
-- **mujoco==3.3.2** (3.13 broke robosuite); opencv 4.9.0.80; numpy 1.26.4; protobuf 6.31.1.
-- Disk expanded earlier (~2.0 TiB free enough).
-- **EXP-000 smoke:** released spatial ckpt, 3 trials/task, center_crop True → **90%** success. Log: `research/experiments/EXP-000.md`.
+## Recent changes (2026-09-21)
+- Frozen `research/datasets/libero-spatial-eval.md` (10 tasks, 50 trials, seed 7 / multi-seed {7,42,123}).
+- Downloaded `libero_spatial_no_noops` RLDS (~1.8G) → `~/vla/modified_libero_rlds/`.
+- Patched `~/vla/openvla/vla-scripts/finetune.py` → `attn_implementation="sdpa"`.
+- Patched dataset_info name → `libero_spatial_no_noops`.
+- Launched detached train: `research/experiments/run_arm_a_train_detached.sh` (WANDB_MODE=offline, r=32, lr 5e-4, eff batch 128, max_steps 50k, save every 5k).
+- Log: `research/experiments/arm_a_train_detached.log` | PID file: `arm_a_train.pid`
 
-## Resume / next commands
+## Monitor
 ```bash
-export CUDA_VISIBLE_DEVICES=1 MUJOCO_GL=egl PYOPENGL_PLATFORM=egl
-export PYTHONPATH="$HOME/vla/openvla:$HOME/vla/LIBERO:$PYTHONPATH"
-eval "$(~/miniconda3/bin/conda shell.bash hook)" && conda activate openvla
-cd ~/vla/openvla
-# full REF gate
-python experiments/robot/libero/run_libero_eval.py \
-  --model_family openvla \
-  --pretrained_checkpoint openvla/openvla-7b-finetuned-libero-spatial \
-  --task_suite_name libero_spatial \
-  --center_crop True \
-  --num_trials_per_task 50
+tail -f ~/projects/openvla-libero-benchmark/research/experiments/arm_a_train_detached.log
+nvidia-smi -i 1
+ls ~/vla/runs ~/vla/adapters
 ```
 
-## Active decisions
-- Base openvla run path (not OFT).
-- LoRA is object of study.
-- GPU-1 only.
-- Pin mujoco 3.3.2 for LIBERO fidelity.
+## Next after train
+1. Eval intermediate adapters (dev trials) via `scripts/run_arm.sh`.
+2. Merge best → `~/vla/merged/arm-A-bf16` on GPU-1.
+3. Full Arm A eval → EXP-001 + five metrics.
 
-## Open questions / blockers
-- Full 50-trial REF not yet run (smoke only).
-- Eval-protocol card values not frozen.
-- HF auth optional (public REF ckpt worked without token).
+## Active decisions
+- Base openvla, LoRA object of study, GPU-1 only, mujoco 3.3.2, W&B offline.
