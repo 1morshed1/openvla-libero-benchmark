@@ -8,6 +8,10 @@ export PYOPENGL_PLATFORM=egl
 export TF_CPP_MIN_LOG_LEVEL=3
 export WANDB_MODE=offline
 export PYTHONPATH="$HOME/vla/openvla:${PYTHONPATH:-}"
+# Detached shells skip .bashrc — pin shared HF cache so we don't re-download.
+export HF_HOME="${HF_HOME:-/office/shared_cache/.cache/huggingface}"
+export HUGGINGFACE_HUB_CACHE="${HUGGINGFACE_HUB_CACHE:-$HF_HOME/hub}"
+export HF_DATASETS_CACHE="${HF_DATASETS_CACHE:-$HF_HOME/datasets}"
 
 LOGDIR="$HOME/projects/openvla-libero-benchmark/research/experiments"
 mkdir -p "$LOGDIR" "$HOME/vla/runs" "$HOME/vla/adapters"
