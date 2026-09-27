@@ -1,7 +1,9 @@
 # Active Context
 
 ## Current focus
-**Phase 1 — Arm A full frozen eval running on GPU-1 (started 2026-09-27 07:18 UTC).** Training done at 50k. Dev evals: 20k = 80%, 50k = **86%** → 50k selected (`~/vla/merged/arm-A-bf16` symlink → `arm-A-dev-50k-bf16`). Full eval = 50 trials × seeds 7, 42, 123, sequential (~1,500 episodes, roughly a day).
+**Phase 1 — Arm A full frozen eval running on GPU-1 (started 2026-09-27 07:18 UTC).** Training done at 50k. Dev evals: 20k = 80%, 50k = **86%** → 50k selected (`~/vla/merged/arm-A-bf16` symlink → `arm-A-dev-50k-bf16`). Full eval = 50 trials × seeds 7, 42, 123, sequential (~1,500 episodes at ~100/h → done ~2026-09-27 22:00 UTC).
+
+**Partial (2026-09-27 11:06 UTC):** seed 7 at 368/500 episodes, **87.5%** (REF seed 7 = 85.4%). Tasks 9 and 10 not yet run — both were weakest in dev, so expect the seed-7 number to fall. Top-drawer task (5) = 34/50, the clear weak spot so far.
 
 ## GPU constraint
 - Train: **GPU-1** (`CUDA_VISIBLE_DEVICES=1`).
@@ -9,16 +11,19 @@
 - Log the eval device per EXP; the final frozen eval should stay on one device across arms.
 
 ## Recent changes
-- Arm A relaunched 2026-09-22 after host reboot; ran uninterrupted to ~49.5k (~7.4 s/step).
-- Snapshotted 20k → `~/vla/merged/arm-A-dev-20k-bf16/` + `~/vla/adapters/arm-A-step20000/`.
-- Dev eval 20k on GPU-2 → **80/100**; weak tasks 5 (top drawer), 9 (next to plate), 10 (on wooden cabinet). Details in `research/experiments/EXP-001.md`.
+- Arm A relaunched 2026-09-22 after host reboot; finished 50k on 2026-09-27 04:08 UTC (~7.4 s/step, ~5 days).
+- Snapshots: 20k → `~/vla/merged/arm-A-dev-20k-bf16/` + `~/vla/adapters/arm-A-step20000/`; 50k → `~/vla/merged/arm-A-dev-50k-bf16/` + `~/vla/adapters/arm-A-step50000/`.
+- Dev eval 20k (GPU-2) = 80/100; 50k (GPU-1) = 86/100; 50k ≥ 20k on every task. Details in `research/experiments/EXP-001.md`.
+- Eval launcher made GPU/NOTE-parametrized (one log per NOTE).
 - Added `research/experiments/measure.py` (five metrics + NVML energy).
 
 ## Monitor
 ```bash
-tail -c 2000 ~/projects/openvla-libero-benchmark/research/experiments/arm_a_train_detached.log | tr '\r' '\n' | tail -3
-nvidia-smi -i 1,2
+pgrep -af run_libero_eval
+ls -t ~/vla/openvla/experiments/logs/*armA-50k-final* | head -1 | xargs grep -c '^Success: True'
+nvidia-smi -i 1
 ```
+Per-seed rollout logs: `~/vla/openvla/experiments/logs/EVAL-libero_spatial-openvla-*--armA-50k-final-s{7,42,123}.txt`. EGL `eglMakeCurrent` traceback at process exit is harmless.
 
 ## Next
 1. Wait for full eval (logs `research/experiments/arm_a_dev_eval_armA-50k-final-s{7,42,123}.log`) → fill EXP-001.

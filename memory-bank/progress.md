@@ -1,7 +1,7 @@
 # Progress
 
 ## Status
-**Phase 1 — Arm A trained (50k); full frozen eval running.** Dev: 20k = 80%, 50k = **86%** (REF 85.4%). 50k selected.
+**Phase 1 — Arm A trained (50k); full frozen eval running.** Dev: 20k = 80%, 50k = **86%** (REF 85.4%). 50k selected. Full eval partial: seed 7 at 368/500 = **87.5%** (2026-09-27 11:06 UTC); seeds 42/123 queued.
 
 ## What works
 - [x] Phase 0 env + REF full **85.4%** (EXP-000).

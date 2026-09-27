@@ -3,7 +3,7 @@
 ## Hardware
 | Box | GPU | Role |
 |-----|-----|------|
-| Office (`vm-130-131`) | 3× RTX PRO 6000 Blackwell ~96 GB each | Train/eval/quantize — **this user: GPU-1 only** (`CUDA_VISIBLE_DEVICES=1`) |
+| Office (`vm-130-131`) | 3× RTX PRO 6000 Blackwell ~96 GB each | Train/eval/quantize — **GPU-1 primary** (`CUDA_VISIBLE_DEVICES=1`); GPU-2 approved for dev evals (shared with other users' jobs) |
 | Home | RTX 2060, 6 GB | Notes, plots, draft only — no 7B |
 | Stretch | Jetson Xavier NX 8/16 GB | Phase 4 only |
 
@@ -17,7 +17,8 @@
 - PyTorch cu128+ (2.7+ first stable sm_120); verify capability `(12, 0)`.
 - transformers **4.40.1**, tokenizers 0.19.1, timm 0.9.10 (keep OpenVLA pins except torch).
 - **No flash-attn** — SDPA attention in model-load / finetune sites.
-- bitsandbytes recent (sm_120 kernels) for int8/int4.
+- bitsandbytes **0.50.2** (sm_120 kernels) for int8/int4.
+- `nvidia-ml-py` for NVML energy in `measure.py`.
 - LIBERO + `experiments/robot/libero/libero_requirements.txt`.
 - MuJoCo: **pin `mujoco==3.3.2`** (3.13 breaks robosuite 1.4.x; ≥3.4 drifts libero_spatial init settle). `MUJOCO_GL=egl`, `PYOPENGL_PLATFORM=egl`.
 - Install openvla with **`pip install -e . --no-deps`** then curated deps — never let pip pull `torch==2.2.0`.
@@ -32,17 +33,20 @@
 - Base for LoRA: `openvla/openvla-7b`.
 - HF cache on this host: `$HF_HOME` → `/office/shared_cache/.cache/huggingface`.
 
-## Eval protocol (to freeze in Phase 1)
-- Suite: `libero_spatial`.
-- Trials/task: 50 final (10–20 dev); seeds: 3 final.
-- `--center_crop True`; `unnorm_key = libero_spatial_no_noops`.
+## Eval protocol (FROZEN 2026-09-21 — `research/datasets/libero-spatial-eval.md`)
+- Suite: `libero_spatial`, all 10 tasks.
+- Trials/task: 50 final (10 dev); seeds: {7, 42, 123} final, 7 for dev.
+- `--center_crop True`; `unnorm_key` = `libero_spatial` (REF) / `libero_spatial_no_noops` (our arms).
 - Device: RTX PRO 6000; log driver/CUDA/torch/bnb every run.
+- Throughput: ~100 episodes/hour per GPU (bf16) → full 3-seed eval ≈ 15 h.
 
 ## LoRA recipe (Arm A)
-- r=32, lr 5e-4, effective batch 128 (e.g. bs 16 × accum 8).
-- `--image_aug True` (pairs with center_crop at eval).
-- Merge via openvla merge script on eval device.
+- r=32, lr 5e-4, effective batch 128 (bs 16 × accum 8), 50k steps, `--image_aug True`.
+- ~7.4 s/step on one RTX PRO 6000, ~63 GiB → 50k ≈ 5 days.
+- `finetune.py` merges the adapter into the base at each save and writes the merged bf16 model to the run dir — that dir is directly evaluable (no separate merge step needed).
+- Only the latest save is kept by default (`save_latest_checkpoint_only=True`).
 
 ## This git repo
 - Remote: `git@github.com:1morshed1/openvla-libero-benchmark.git`
-- Currently: plan + research scaffold; no train/eval code checked in yet.
+- Launchers in `research/experiments/`: `run_ref_full50_detached.sh`, `run_arm_a_train_detached.sh`, `run_arm_a_dev_eval_gpu2_detached.sh` (generic eval: GPU/CKPT/TRIALS/SEED/NOTE env vars). All detach via `setsid nohup` to survive disconnects.
+- Harness: `research/experiments/measure.py` (+ energy); older `scripts/metrics.py`, `scripts/run_arm.sh`, `scripts/train_arm_a.sh`.
