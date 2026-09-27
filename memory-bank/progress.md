@@ -1,7 +1,7 @@
 # Progress
 
 ## Status
-**Phase 1 — Arm A train ~49.5k / 50k.** Dev eval @20k = **80%** (REF 85.4%). Protocol frozen. EXP-000 PASS.
+**Phase 1 — Arm A trained (50k); full frozen eval running.** Dev: 20k = 80%, 50k = **86%** (REF 85.4%). 50k selected.
 
 ## What works
 - [x] Phase 0 env + REF full **85.4%** (EXP-000).
@@ -11,12 +11,12 @@
 - [x] Arm A LoRA trained to ~50k (relaunch after reboot).
 - [x] Dev eval @20k: 80/100.
 - [x] Five-metric (+energy) harness: `research/experiments/measure.py`.
-- [ ] Dev eval @50k.
-- [ ] Merge best + EXP-001 full eval.
+- [x] Dev eval @50k: 86/100 → selected as `arm-A-bf16`.
+- [ ] EXP-001 full eval (running).
 
 ## What's left
-- [ ] Dev-eval 50k → pick 20k vs 50k
-- [ ] Merge bf16 → EXP-001 five metrics (+ energy)
+- [ ] Full eval 50 × {7,42,123} → EXP-001; REF seeds 42/123
+- [ ] `measure.py` five metrics (+ energy)
 - [ ] Arms B/C (+ D/E stretch)
 - [ ] Results table, figures, paper, public README
 
@@ -31,7 +31,7 @@
 | Phase | Goal | State |
 |-------|------|-------|
 | 0 | Env + REF EXP-000 | **DONE** |
-| 1 | Freeze harness + Arm A | Train ~done; dev @20k = 80%; 50k dev + full eval pending |
+| 1 | Freeze harness + Arm A | Trained; 50k selected (dev 86%); full eval running |
 | 2 | Quantize B/C(/D) | Not started |
 | 3 | Write-up + figures | Not started |
 | 4 | Jetson E | Stretch |

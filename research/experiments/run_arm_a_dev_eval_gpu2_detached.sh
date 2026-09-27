@@ -3,7 +3,8 @@
 # Protocol: libero_spatial, 10 trials/task, seed 7, center_crop True.
 # Checkpoint: frozen snapshot of the step-20k merged bf16 weights.
 set -euo pipefail
-export CUDA_VISIBLE_DEVICES=2
+GPU="${GPU:-2}"
+export CUDA_VISIBLE_DEVICES="$GPU"
 export MUJOCO_GL=egl
 export PYOPENGL_PLATFORM=egl
 export TF_CPP_MIN_LOG_LEVEL=3
@@ -19,17 +20,17 @@ NOTE="${NOTE:-armA-20k-dev}"
 
 LOGDIR="$HOME/projects/openvla-libero-benchmark/research/experiments"
 mkdir -p "$LOGDIR" "$HOME/vla/openvla/experiments/logs"
-LOG="$LOGDIR/arm_a_dev_eval_gpu2.log"
+LOG="$LOGDIR/arm_a_dev_eval_${NOTE}.log"
 
 eval "$("$HOME/miniconda3/bin/conda" shell.bash hook)"
 conda activate openvla
 cd "$HOME/vla/openvla"
 
 {
-  echo "START $(date -Is) Arm A DEV eval GPU-2"
+  echo "START $(date -Is) Arm A DEV eval GPU-$GPU"
   echo "ckpt=$CKPT trials=$TRIALS seed=$SEED note=$NOTE"
   echo "torch=$(python -c 'import torch; print(torch.__version__, torch.cuda.get_device_capability(0), torch.cuda.get_device_name(0))')"
-  nvidia-smi -i 2 --query-gpu=memory.free,memory.used,memory.total --format=csv
+  nvidia-smi -i "$GPU" --query-gpu=memory.free,memory.used,memory.total --format=csv
   python experiments/robot/libero/run_libero_eval.py \
     --model_family openvla \
     --pretrained_checkpoint "$CKPT" \

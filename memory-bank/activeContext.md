@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current focus
-**Phase 1 — Arm A LoRA finishing (~49.5k / 50k on GPU-1, 2026-09-27).** Dev eval of the 20k checkpoint: **80%** (10 trials/task, seed 7) vs REF 85.4%. Next: dev-eval 50k, pick the better one, full frozen eval.
+**Phase 1 — Arm A full frozen eval running on GPU-1 (started 2026-09-27 07:18 UTC).** Training done at 50k. Dev evals: 20k = 80%, 50k = **86%** → 50k selected (`~/vla/merged/arm-A-bf16` symlink → `arm-A-dev-50k-bf16`). Full eval = 50 trials × seeds 7, 42, 123, sequential (~1,500 episodes, roughly a day).
 
 ## GPU constraint
 - Train: **GPU-1** (`CUDA_VISIBLE_DEVICES=1`).
@@ -21,10 +21,12 @@ nvidia-smi -i 1,2
 ```
 
 ## Next
-1. When train hits 50k: snapshot run dir → `~/vla/merged/arm-A-dev-50k-bf16/`, dev-eval on GPU-2 (`CKPT=... NOTE=armA-50k-dev`).
-2. Pick better of 20k / 50k → `~/vla/merged/arm-A-bf16`.
-3. Full frozen eval (50 × seeds {7,42,123}) → fill EXP-001; `measure.py` for perf+energy.
+1. Wait for full eval (logs `research/experiments/arm_a_dev_eval_armA-50k-final-s{7,42,123}.log`) → fill EXP-001.
+2. REF seeds 42, 123 (REF only has seed 7) for a like-for-like comparison.
+3. `measure.py` on `arm-A-bf16` for perf+energy.
 4. Arms B/C reuse the same merged dir + `measure.py` (precision only).
+
+Eval launcher: `GPU=<n> CKPT=<dir> TRIALS=<n> SEED=<s> NOTE=<tag> bash research/experiments/run_arm_a_dev_eval_gpu2_detached.sh` (log per NOTE).
 
 ## Active decisions
 - Base openvla, LoRA object of study, mujoco 3.3.2, W&B offline.
