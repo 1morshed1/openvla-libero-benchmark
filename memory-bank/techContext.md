@@ -3,7 +3,7 @@
 ## Hardware
 | Box | GPU | Role |
 |-----|-----|------|
-| Office (`vm-130-131`) | 3× RTX PRO 6000 Blackwell ~96 GB each | Train/eval/quantize — **GPU-1 primary** (`CUDA_VISIBLE_DEVICES=1`); GPU-2 approved for dev evals (shared with other users' jobs) |
+| Office (`vm-130-131`) | 3× RTX PRO 6000 Blackwell ~96 GB each | Train/eval/quantize — **GPU-1 only, for everything** (`CUDA_VISIBLE_DEVICES=1`). Never GPU-0 or GPU-2. |
 | Home | RTX 2060, 6 GB | Notes, plots, draft only — no 7B |
 | Stretch | Jetson Xavier NX 8/16 GB | Phase 4 only |
 
@@ -48,5 +48,5 @@
 
 ## This git repo
 - Remote: `git@github.com:1morshed1/openvla-libero-benchmark.git`
-- Launchers in `research/experiments/`: `run_ref_full50_detached.sh`, `run_arm_a_train_detached.sh`, `run_arm_a_dev_eval_gpu2_detached.sh` (generic eval: GPU/CKPT/TRIALS/SEED/NOTE env vars). All detach via `setsid nohup` to survive disconnects.
+- Launchers in `research/experiments/`: `run_ref_full50_detached.sh`, `run_arm_a_train_detached.sh`, `run_arm_a_dev_eval_gpu2_detached.sh` (generic eval on GPU-1: CKPT/TRIALS/SEED/NOTE env vars; the `gpu2` in the name is legacy — rename after the running full eval finishes, since that loop calls it by path). All detach via `setsid nohup` to survive disconnects.
 - Harness: `research/experiments/measure.py` (+ energy); older `scripts/metrics.py`, `scripts/run_arm.sh`, `scripts/train_arm_a.sh`.

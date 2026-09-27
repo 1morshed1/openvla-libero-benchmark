@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Detached Arm A DEV eval on GPU-2 (train can keep running on GPU-1).
+# Detached Arm A eval on GPU-1.
 # Protocol: libero_spatial, 10 trials/task, seed 7, center_crop True.
 # Checkpoint: frozen snapshot of the step-20k merged bf16 weights.
 set -euo pipefail
-GPU="${GPU:-2}"
+GPU="${GPU:-1}"
 export CUDA_VISIBLE_DEVICES="$GPU"
 export MUJOCO_GL=egl
 export PYOPENGL_PLATFORM=egl

@@ -5,10 +5,9 @@
 
 **Partial (2026-09-27 11:06 UTC):** seed 7 at 368/500 episodes, **87.5%** (REF seed 7 = 85.4%). Tasks 9 and 10 not yet run — both were weakest in dev, so expect the seed-7 number to fall. Top-drawer task (5) = 34/50, the clear weak spot so far.
 
-## GPU constraint
-- Train: **GPU-1** (`CUDA_VISIBLE_DEVICES=1`).
-- Dev evals: **GPU-2** allowed (user-approved 2026-09-24) — `research/experiments/run_arm_a_dev_eval_gpu2_detached.sh`.
-- Log the eval device per EXP; the final frozen eval should stay on one device across arms.
+## GPU constraint (hard, user-set)
+- **GPU-1 only, for everything** — train, eval, quantize, measure. `CUDA_VISIBLE_DEVICES=1`. Never GPU-0 or GPU-2.
+- The 20k dev eval on GPU-2 (2026-09-24) was a one-off the user asked for; it is **not** a standing permission.
 
 ## Recent changes
 - Arm A relaunched 2026-09-22 after host reboot; finished 50k on 2026-09-27 04:08 UTC (~7.4 s/step, ~5 days).
@@ -31,7 +30,7 @@ Per-seed rollout logs: `~/vla/openvla/experiments/logs/EVAL-libero_spatial-openv
 3. `measure.py` on `arm-A-bf16` for perf+energy.
 4. Arms B/C reuse the same merged dir + `measure.py` (precision only).
 
-Eval launcher: `GPU=<n> CKPT=<dir> TRIALS=<n> SEED=<s> NOTE=<tag> bash research/experiments/run_arm_a_dev_eval_gpu2_detached.sh` (log per NOTE).
+Eval launcher (defaults to GPU-1): `CKPT=<dir> TRIALS=<n> SEED=<s> NOTE=<tag> bash research/experiments/run_arm_a_dev_eval_gpu2_detached.sh` (log per NOTE). Rename it once the running full eval is done.
 
 ## Active decisions
 - Base openvla, LoRA object of study, mujoco 3.3.2, W&B offline.

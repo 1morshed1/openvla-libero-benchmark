@@ -7,7 +7,7 @@
 - [x] Phase 0 env + REF full **85.4%** (EXP-000).
 - [x] Eval protocol frozen (`research/datasets/libero-spatial-eval.md`).
 - [x] Training data `libero_spatial_no_noops` on disk (shards renamed).
-- [x] Finetune SDPA patch; detached train + GPU-2 dev-eval launchers.
+- [x] Finetune SDPA patch; detached train + eval launchers (GPU-1).
 - [x] Arm A LoRA trained to ~50k (relaunch after reboot).
 - [x] Dev eval @20k: 80/100.
 - [x] Five-metric (+energy) harness: `research/experiments/measure.py`.
