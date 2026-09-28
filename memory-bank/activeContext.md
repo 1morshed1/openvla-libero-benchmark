@@ -16,7 +16,7 @@
 
 ## Next
 1. `measure.py` on `~/vla/merged/arm-A-bf16` (GPU-1) → fill perf/energy rows in EXP-001.
-2. EXP-002 (int8) / EXP-003 (int4): same `arm-A-bf16` weights, precision only; one 500-episode run each; McNemar vs Arm A. Check the quant-load landmine first.
+2. EXP-002 (int8) / EXP-003 (int4): same `arm-A-bf16` weights, precision only; one 500-episode run each; McNemar vs Arm A. Quant-load path is aligned (see below).
 
 Eval launcher: `CKPT=<dir> TRIALS=<n> NOTE=<tag> setsid nohup bash research/experiments/run_eval_detached.sh &` (log `research/experiments/arm_a_dev_eval_<NOTE>.log`; rollout log under `~/vla/openvla/experiments/logs/`). ~100 episodes/h when the host is quiet.
 
@@ -32,6 +32,6 @@ Eval launcher: `CKPT=<dir> TRIALS=<n> NOTE=<tag> setsid nohup bash research/expe
 - **`save_latest_checkpoint_only=True` is the finetune.py default** — every 5k save overwrites the last. Pass `--save_latest_checkpoint_only False` or snapshot each save.
 - **Seeds don't matter in the LIBERO harness** (fixed per-episode init states + greedy decoding).
 - **NVML vs torch index:** under `CUDA_VISIBLE_DEVICES=N`, torch `cuda:0` == NVML physical **N** (`measure.py` auto-resolves).
-- Quant load path: eval harness uses `load_in_8bit`/`load_in_4bit` flags in `openvla_utils.py`; `measure.py` uses `BitsAndBytesConfig` — mirror eval for B/C success numbers.
+- Quant load path: eval harness passes bare `load_in_8bit`/`load_in_4bit` + `torch_dtype=bf16` in `openvla_utils.py`. Under transformers 4.40.1 int4 resolves to **fp4 / no double-quant / fp32 compute** (not nf4). `measure.py` mirrors this exactly (fixed 2026-09-28). Arm C = stock OpenVLA fp4 — do not patch the external clone to nf4.
 - Detached shells skip `.bashrc` — launchers pin `HF_HOME` to the shared cache.
 - EGL `eglMakeCurrent` traceback at eval process exit is harmless.

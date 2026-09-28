@@ -21,7 +21,7 @@ Hold **weights fixed** after Arm A; vary **only precision**. REF = harness check
 | REF | bf16 released | Harness gate |
 | A | bf16 merged LoRA | Full-precision baseline |
 | B | int8 (bnb) | Cheap PTQ |
-| C | int4/NF4 (bnb) | Aggressive PTQ |
+| C | int4/fp4 (bnb, stock `load_in_4bit`) | Aggressive PTQ |
 | D | GPTQ/AWQ 4-bit | Stretch deployable |
 | E | on-device 4-bit | Jetson stretch |
 

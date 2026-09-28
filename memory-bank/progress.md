@@ -24,7 +24,8 @@
 - `save_latest_checkpoint_only=True` default lost 25k–45k checkpoints.
 - CPU-heavy jobs on the host (e.g. gfm-slam) slow LIBERO evals.
 - W&B offline (no cloud login); `wandb sync` later for curves.
-- `measure.py` quant path vs `openvla_utils.py` flags — align before Arm B/C.
+- ~~`measure.py` quant path vs `openvla_utils.py` flags~~ — aligned 2026-09-28 (int4 = fp4 / no double-quant / fp32 compute; non-quantized layers bf16).
+- Stretch (after A/B/C): nf4 + double-quant as a separate arm beside D (GPTQ/AWQ) — not a replacement for C.
 
 ## Phase map
 | Phase | Goal | State |

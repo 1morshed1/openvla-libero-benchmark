@@ -40,7 +40,7 @@ Weights are held fixed; the controlled comparison varies **only precision**.
 | REF | Reference | Released `openvla-7b-finetuned-libero-spatial` | bf16 | Sanity-check harness against 84.7% |
 | A | Baseline (our LoRA) | Our r=32 LoRA fine-tune, merged into base | bf16 | Honest full-precision point; proves the pipeline |
 | B | int8 | Arm A weights | int8 (bitsandbytes) | Cheap PTQ point |
-| C | int4 | Arm A weights | int4 / NF4 (bitsandbytes) | Aggressive PTQ point |
+| C | int4 | Arm A weights | int4 / fp4 (bitsandbytes, stock) | Aggressive PTQ point |
 | D (stretch) | GPTQ/AWQ 4-bit | Arm A weights | 4-bit, calibrated | Deployment-grade PTQ |
 | E (stretch) | On-device | Arm C or D | 4-bit | Jetson Xavier NX real-hardware numbers |
 

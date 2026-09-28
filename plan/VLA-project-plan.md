@@ -41,7 +41,7 @@ You fine-tune your own policy (you have the compute), and the controlled compari
 | REF | Reference | Released `openvla-7b-finetuned-libero-spatial` | bf16 | Sanity-check the harness against 84.7% |
 | A | Baseline (your LoRA) | Your r=32 LoRA fine-tune, merged into base | bf16 | The honest full-precision point; proves the pipeline |
 | B | int8 | Arm A weights | int8 (bitsandbytes) | Cheap PTQ point |
-| C | int4 | Arm A weights | int4 / NF4 (bitsandbytes) | Aggressive PTQ point |
+| C | int4 | Arm A weights | int4 / fp4 (bitsandbytes, stock) | Aggressive PTQ point |
 | D (stretch) | GPTQ/AWQ 4-bit | Arm A weights | 4-bit, calibrated | Deployment-grade PTQ; showcases the quantization skill |
 | E (stretch) | On-device | Arm C or D | 4-bit | Jetson Xavier NX real-hardware numbers |
 
@@ -287,9 +287,9 @@ Every arm here reuses Arm A's weights and the exact same frozen harness. **Only 
 
 Load Arm A with `load_in_8bit=True` (bitsandbytes). If `run_libero_eval.py` exposes `--load_in_8bit`, use it; otherwise set it at the model-load site. Run the harness. **Log EXP-002.**
 
-### Step 2.2 — Arm C: 4-bit / NF4 (bitsandbytes)
+### Step 2.2 — Arm C: 4-bit / fp4 (bitsandbytes, stock `load_in_4bit`)
 
-Same, with `load_in_4bit=True` (NF4). Run the harness. **Log EXP-003.** Record the success-rate degradation vs. Arm A explicitly — this delta is the heart of the answer.
+Same, with `load_in_4bit=True` (resolves to fp4 / no double-quant / fp32 compute under transformers 4.40.1). Run the harness. **Log EXP-003.** Record the success-rate degradation vs. Arm A explicitly — this delta is the heart of the answer.
 
 ### Step 2.3 — Arm D (stretch): GPTQ or AWQ 4-bit
 

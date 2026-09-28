@@ -104,25 +104,28 @@ class PowerSampler(threading.Thread):
 # The SUCCESS number for arms B/C comes from run_libero_eval.py -> openvla_utils.py,
 # which builds its own BitsAndBytesConfig. The COST numbers (here) must load the
 # model with the *identical* config, or success and cost describe different models.
-# Before running B/C, confirm the configs below match openvla_utils.py exactly:
-#   int8: load_in_8bit=True  (bnb default llm_int8_threshold=6.0)
-#   int4: load_in_4bit=True, nf4, double_quant=True, compute_dtype=bfloat16
-# If openvla_utils.py differs (e.g. a different threshold or fp32 compute), change
-# THIS file to match it, not the other way round — the eval harness defines truth.
+# openvla_utils.py passes bare load_in_8bit / load_in_4bit plus torch_dtype=bf16,
+# which under transformers 4.40.1 resolves to (verified 2026-09-28):
+#   int8: load_in_8bit=True, llm_int8_threshold=6.0
+#   int4: load_in_4bit=True, quant_type=fp4, double_quant=False, compute_dtype=float32
+#   non-quantized layers: bfloat16
+# If openvla_utils.py differs, change THIS file to match it, not the other way
+# round — the eval harness defines truth.
 def load_policy(checkpoint: str, precision: str, device: str = "cuda:0"):
     common = dict(trust_remote_code=True, low_cpu_mem_usage=True,
+                  torch_dtype=torch.bfloat16,
                   attn_implementation="sdpa")  # <- Blackwell/SDPA path, no flash-attn
     if precision == "bf16":
         vla = AutoModelForVision2Seq.from_pretrained(
-            checkpoint, torch_dtype=torch.bfloat16, **common).to(device)
+            checkpoint, **common).to(device)
     elif precision == "int8":
         qc = BitsAndBytesConfig(load_in_8bit=True)
         vla = AutoModelForVision2Seq.from_pretrained(
             checkpoint, quantization_config=qc, device_map={"": 0}, **common)
     elif precision == "int4":
         qc = BitsAndBytesConfig(
-            load_in_4bit=True, bnb_4bit_quant_type="nf4",
-            bnb_4bit_use_double_quant=True, bnb_4bit_compute_dtype=torch.bfloat16)
+            load_in_4bit=True, bnb_4bit_quant_type="fp4",
+            bnb_4bit_use_double_quant=False, bnb_4bit_compute_dtype=torch.float32)
         vla = AutoModelForVision2Seq.from_pretrained(
             checkpoint, quantization_config=qc, device_map={"": 0}, **common)
     else:
@@ -137,8 +140,10 @@ def loaded_footprint_gb(model) -> float:
 
     Sums the real byte size of every parameter and buffer. For bitsandbytes this
     captures the quantized reality the on-disk bf16 dir cannot: int8 weights are
-    stored as 1-byte tensors, nf4 weights as packed uint8 (half-byte/param) plus
-    their absmax / double-quant state buffers. This is the honest "model size"
+    stored as 1-byte tensors, 4-bit weights as packed uint8 (half-byte/param).
+    bnb keeps the quantization scales (int8 SCB, 4-bit quant_state.absmax) as
+    attributes on the weight rather than as params/buffers, so they are added
+    explicitly (~0.1% for int8, ~3% for fp4). This is the honest "model size"
     metric to compare across arms A/B/C — dir_size_gb() reports the shared bf16
     checkpoint and would be identical (and wrong) for every quantized arm.
     """
@@ -149,6 +154,11 @@ def loaded_footprint_gb(model) -> float:
             continue
         seen.add(id(t))
         total += t.numel() * t.element_size()
+        qs = getattr(t, "quant_state", None)
+        for s in (getattr(t, "SCB", None), getattr(qs, "absmax", None)):
+            if isinstance(s, torch.Tensor) and id(s) not in seen:
+                seen.add(id(s))
+                total += s.numel() * s.element_size()
     return total / 1e9
 
 
