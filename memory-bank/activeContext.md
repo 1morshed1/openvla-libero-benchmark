@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current focus
-**Phase 1 — Arm A success result done; H1 supported.** Arm A (LoRA r=32, 50k) = **86.0% (430/500)** vs REF **85.4% (427/500)** on the same 500 initial states; exact McNemar p = 0.83. Next: `measure.py` perf/energy for Arm A, then Arms B (int8) / C (int4).
+**Phase 1 — Arm A success result done; H1 supported.** Arm A (LoRA r=32, 50k) = **86.0% (430/500)** vs REF **85.4% (427/500)** on the same 500 initial states; exact McNemar p = 0.83. Arm A perf/energy measured (177 ms/action, 50 J/action) — **EXP-001 complete.** Next: Arms B (int8) / C (int4).
 
 ## GPU constraint (hard, user-set)
 - **GPU-1 only, for everything** — train, eval, quantize, measure. `CUDA_VISIBLE_DEVICES=1`. Never GPU-0 or GPU-2.
@@ -13,10 +13,12 @@
 - Full eval (50 trials/task, seed 7) → 86.0%. Per-task Arm A vs REF in `research/experiments/EXP-001.md`.
 - **Seeds are deterministic:** seed 42 matched seed 7 on all 358 episodes compared. User approved stopping seeds 42/123. Protocol amended (`research/datasets/libero-spatial-eval.md`, Amendment 1): one 500-episode seed-7 run per arm; uncertainty via binomial CI + McNemar vs comparison arm.
 - Eval launcher renamed → `research/experiments/run_eval_detached.sh` (defaults to GPU-1).
+- 2026-09-28: `measure.py` aligned to eval quant path, fixed (norm stats from checkpoint; sampler `_stop` shadowing `Thread._stop`), and run on Arm A → `research/results/arm-A-bf16.json`.
 
 ## Next
-1. `measure.py` on `~/vla/merged/arm-A-bf16` (GPU-1) → fill perf/energy rows in EXP-001.
-2. EXP-002 (int8) / EXP-003 (int4): same `arm-A-bf16` weights, precision only; one 500-episode run each; McNemar vs Arm A. Quant-load path is aligned (see below).
+1. EXP-002 (int8) / EXP-003 (int4): same `arm-A-bf16` weights, precision only; one 500-episode run each; McNemar vs Arm A. Quant-load path is aligned (see below).
+
+Measure launcher: `ARM=<B> PRECISION=<int8|int4> SUCCESS_RATE=<pct> setsid nohup bash research/experiments/run_measure_when_idle.sh &` — waits for GPU-1 idle 5 min (perf/energy are whole-GPU).
 
 Eval launcher: `CKPT=<dir> TRIALS=<n> NOTE=<tag> setsid nohup bash research/experiments/run_eval_detached.sh &` (log `research/experiments/arm_a_dev_eval_<NOTE>.log`; rollout log under `~/vla/openvla/experiments/logs/`). ~100 episodes/h when the host is quiet.
 

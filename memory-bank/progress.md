@@ -1,7 +1,7 @@
 # Progress
 
 ## Status
-**Phase 1 — Arm A success result done; H1 supported.** Arm A **86.0%** (430/500) vs REF **85.4%** (427/500), McNemar p = 0.83. Perf/energy measurement next.
+**Phase 1 — Arm A success result done; H1 supported.** Arm A **86.0%** (430/500) vs REF **85.4%** (427/500), McNemar p = 0.83. Perf/energy measured (bf16: 177 ms, 15.1 GB, 5.64 act/s, 50 J/action). **EXP-001 complete.** Next: Arm B (int8).
 
 ## What works
 - [x] Phase 0 env + REF full **85.4%** (EXP-000).
@@ -11,10 +11,10 @@
 - [x] Arm A LoRA trained to 50k.
 - [x] Dev evals: 20k = 80/100, 50k = 86/100 → 50k selected as `arm-A-bf16`.
 - [x] EXP-001 full eval: 86.0% (95% CI 83.0–89.0).
-- [x] Five-metric (+energy) harness: `research/experiments/measure.py`.
+- [x] Five-metric (+energy) harness: `research/experiments/measure.py`; idle-GPU launcher `run_measure_when_idle.sh`.
+- [x] Arm A perf/energy: 177.2 ms median, 15.5 GB peak (torch), 15.1 GB, 5.64 act/s, 50.0 J/action @ 282 W.
 
 ## What's left
-- [ ] `measure.py` on Arm A → EXP-001 perf/energy rows
 - [ ] Arms B (int8) / C (int4) (+ D/E stretch)
 - [ ] Results table, figures, paper, public README
 
@@ -31,7 +31,7 @@
 | Phase | Goal | State |
 |-------|------|-------|
 | 0 | Env + REF EXP-000 | **DONE** |
-| 1 | Freeze harness + Arm A | Success result **DONE** (86.0%); perf/energy pending |
+| 1 | Freeze harness + Arm A | **DONE** (86.0%, 177 ms, 50 J/action) |
 | 2 | Quantize B/C(/D) | Not started |
 | 3 | Write-up + figures | Not started |
 | 4 | Jetson E | Stretch |

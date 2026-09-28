@@ -1,0 +1,19 @@
+{
+  "arm": "A",
+  "precision": "bf16",
+  "checkpoint": "/office/dev_workspace/morshed/vla/merged/arm-A-bf16",
+  "success_rate_pct": 86.0,
+  "model_size_gb": 15.116,
+  "disk_size_gb": 15.085,
+  "latency_ms_median": 177.15,
+  "latency_ms_p90": 179.36,
+  "throughput_act_s": 5.64,
+  "peak_mem_torch_gb": 15.477,
+  "peak_mem_nvml_gb": 16.902,
+  "energy_j_per_action": 50.029,
+  "avg_power_w": 282.5,
+  "n_iters": 50,
+  "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "unnorm_key": "libero_spatial_no_noops",
+  "timestamp": "2026-09-28T07:43:29"
+}

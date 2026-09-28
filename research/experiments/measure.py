@@ -61,7 +61,7 @@ class PowerSampler(threading.Thread):
     def __init__(self, nvml_index: int, interval_s: float = 0.02):
         super().__init__(daemon=True)
         self.interval = interval_s
-        self._stop = threading.Event()
+        self._stop_evt = threading.Event()
         self.samples: list[tuple[float, float]] = []  # (t, watts)
         self.ok = _NVML
         if self.ok:
@@ -71,7 +71,7 @@ class PowerSampler(threading.Thread):
     def run(self):
         if not self.ok:
             return
-        while not self._stop.is_set():
+        while not self._stop_evt.is_set():
             try:
                 w = pynvml.nvmlDeviceGetPowerUsage(self.handle) / 1000.0  # mW -> W
                 self.samples.append((time.perf_counter(), w))
@@ -80,7 +80,7 @@ class PowerSampler(threading.Thread):
             time.sleep(self.interval)
 
     def stop(self):
-        self._stop.set()
+        self._stop_evt.set()
         self.join(timeout=2.0)
 
     def energy_joules(self) -> float | None:
@@ -131,6 +131,11 @@ def load_policy(checkpoint: str, precision: str, device: str = "cuda:0"):
     else:
         raise ValueError(f"unknown precision {precision!r} (bf16|int8|int4)")
     vla.eval()
+    # Fine-tuned checkpoints carry their action stats here; openvla_utils.py does the same.
+    stats_path = os.path.join(checkpoint, "dataset_statistics.json")
+    if os.path.isfile(stats_path):
+        with open(stats_path) as f:
+            vla.norm_stats = json.load(f)
     processor = AutoProcessor.from_pretrained(checkpoint, trust_remote_code=True)
     return vla, processor
 
