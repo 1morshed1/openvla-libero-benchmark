@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Detached LIBERO-Spatial eval on GPU-1 (center_crop True).
-# Env: CKPT (merged checkpoint dir), TRIALS (10 dev / 50 final), SEED (7), NOTE (log tag).
+# Env: CKPT (merged checkpoint dir), TRIALS (10 dev / 50 final), SEED (7), NOTE (log tag),
+#      LOAD_IN_8BIT / LOAD_IN_4BIT (False; True for Arms B / C — same bf16 CKPT).
 # The seed does not change outcomes — see Amendment 1 in research/datasets/libero-spatial-eval.md.
 set -euo pipefail
 GPU="${GPU:-1}"
@@ -17,6 +18,8 @@ CKPT="${CKPT:-$HOME/vla/merged/arm-A-dev-20k-bf16}"
 TRIALS="${TRIALS:-10}"
 SEED="${SEED:-7}"
 NOTE="${NOTE:-armA-20k-dev}"
+LOAD_IN_8BIT="${LOAD_IN_8BIT:-False}"
+LOAD_IN_4BIT="${LOAD_IN_4BIT:-False}"
 
 LOGDIR="$HOME/projects/openvla-libero-benchmark/research/experiments"
 mkdir -p "$LOGDIR" "$HOME/vla/openvla/experiments/logs"
@@ -28,7 +31,7 @@ cd "$HOME/vla/openvla"
 
 {
   echo "START $(date -Is) Arm A DEV eval GPU-$GPU"
-  echo "ckpt=$CKPT trials=$TRIALS seed=$SEED note=$NOTE"
+  echo "ckpt=$CKPT trials=$TRIALS seed=$SEED note=$NOTE 8bit=$LOAD_IN_8BIT 4bit=$LOAD_IN_4BIT"
   echo "torch=$(python -c 'import torch; print(torch.__version__, torch.cuda.get_device_capability(0), torch.cuda.get_device_name(0))')"
   nvidia-smi -i "$GPU" --query-gpu=memory.free,memory.used,memory.total --format=csv
   python experiments/robot/libero/run_libero_eval.py \
@@ -36,6 +39,8 @@ cd "$HOME/vla/openvla"
     --pretrained_checkpoint "$CKPT" \
     --task_suite_name libero_spatial \
     --center_crop True \
+    --load_in_8bit "$LOAD_IN_8BIT" \
+    --load_in_4bit "$LOAD_IN_4BIT" \
     --num_trials_per_task "$TRIALS" \
     --seed "$SEED" \
     --run_id_note "$NOTE" \

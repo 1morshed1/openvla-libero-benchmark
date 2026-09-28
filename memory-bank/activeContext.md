@@ -16,11 +16,12 @@
 - 2026-09-28: `measure.py` aligned to eval quant path, fixed (norm stats from checkpoint; sampler `_stop` shadowing `Thread._stop`), and run on Arm A → `research/results/arm-A-bf16.json`.
 
 ## Next
-1. EXP-002 (int8) / EXP-003 (int4): same `arm-A-bf16` weights, precision only; one 500-episode run each; McNemar vs Arm A. Quant-load path is aligned (see below).
+1. **EXP-002 (int8) full eval RUNNING** since 2026-09-28 05:55 UTC (`NOTE=armB-int8-final-s7`, `LOAD_IN_8BIT=True`); then `measure.py` int8, then EXP-003 (int4).
+   Both arms: same `arm-A-bf16` weights, precision only; one 500-episode run each; McNemar vs Arm A. Quant-load path is aligned (see below).
 
 Measure launcher: `ARM=<B> PRECISION=<int8|int4> SUCCESS_RATE=<pct> setsid nohup bash research/experiments/run_measure_when_idle.sh &` — waits for GPU-1 idle 5 min (perf/energy are whole-GPU).
 
-Eval launcher: `CKPT=<dir> TRIALS=<n> NOTE=<tag> setsid nohup bash research/experiments/run_eval_detached.sh &` (log `research/experiments/arm_a_dev_eval_<NOTE>.log`; rollout log under `~/vla/openvla/experiments/logs/`). ~100 episodes/h when the host is quiet.
+Eval launcher: `CKPT=<dir> TRIALS=<n> NOTE=<tag> [LOAD_IN_8BIT=True|LOAD_IN_4BIT=True] setsid nohup bash research/experiments/run_eval_detached.sh &` (log `research/experiments/arm_a_dev_eval_<NOTE>.log`; rollout log under `~/vla/openvla/experiments/logs/`). ~100 episodes/h when the host is quiet.
 
 ## Active decisions
 - Base openvla, LoRA object of study, mujoco 3.3.2, W&B offline.
@@ -35,5 +36,6 @@ Eval launcher: `CKPT=<dir> TRIALS=<n> NOTE=<tag> setsid nohup bash research/expe
 - **Seeds don't matter in the LIBERO harness** (fixed per-episode init states + greedy decoding).
 - **NVML vs torch index:** under `CUDA_VISIBLE_DEVICES=N`, torch `cuda:0` == NVML physical **N** (`measure.py` auto-resolves).
 - Quant load path: eval harness passes bare `load_in_8bit`/`load_in_4bit` + `torch_dtype=bf16` in `openvla_utils.py`. Under transformers 4.40.1 int4 resolves to **fp4 / no double-quant / fp32 compute** (not nf4). `measure.py` mirrors this exactly (fixed 2026-09-28). Arm C = stock OpenVLA fp4 — do not patch the external clone to nf4.
+- **accelerate must stay 0.30.1** — 1.15 broke bnb int8/int4 loading under transformers 4.40.1 (`.to is not supported for 4-bit or 8-bit`).
 - Detached shells skip `.bashrc` — launchers pin `HF_HOME` to the shared cache.
 - EGL `eglMakeCurrent` traceback at eval process exit is harmless.

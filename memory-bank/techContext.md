@@ -18,6 +18,7 @@
 - transformers **4.40.1**, tokenizers 0.19.1, timm 0.9.10 (keep OpenVLA pins except torch).
 - **No flash-attn** — SDPA attention in model-load / finetune sites.
 - bitsandbytes **0.50.2** (sm_120 kernels) for int8/int4.
+- accelerate **0.30.1** (pinned 2026-09-28, `--no-deps`). accelerate ≥1.x calls `.to()` on bnb 8-bit models (assumes bnb ≥0.48 allows it), which transformers 4.40.1 forbids → int8/int4 loads crash. Do not upgrade accelerate.
 - `nvidia-ml-py` for NVML energy in `measure.py`.
 - LIBERO + `experiments/robot/libero/libero_requirements.txt`.
 - MuJoCo: **pin `mujoco==3.3.2`** (3.13 breaks robosuite 1.4.x; ≥3.4 drifts libero_spatial init settle). `MUJOCO_GL=egl`, `PYOPENGL_PLATFORM=egl`.
