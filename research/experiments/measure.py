@@ -6,7 +6,8 @@ Measures, identically for every arm (A/B/C/D):
     success rate (%)      <- passed in from run_libero_eval (--success_rate)
     latency (ms)          <- median per predict_action() call
     peak memory (GB)      <- torch peak + NVML total (incl. CUDA context)
-    model size (GB)       <- on-disk size of the checkpoint dir
+    model size (GB)       <- resident weight footprint of the LOADED model
+                             (quantization-aware; disk_size_gb kept for reference)
     throughput (act/s)    <- 1000 / median_latency_ms
     energy (J/action)     <- NVML power integrated over a fixed workload  [NEW]
     avg power (W)
@@ -99,6 +100,15 @@ class PowerSampler(threading.Thread):
 # ----------------------------------------------------------------------------- #
 # Model loading (precision is the only thing that changes across arms)
 # ----------------------------------------------------------------------------- #
+# !!! QUANT-PATH ALIGNMENT (landmine) !!!
+# The SUCCESS number for arms B/C comes from run_libero_eval.py -> openvla_utils.py,
+# which builds its own BitsAndBytesConfig. The COST numbers (here) must load the
+# model with the *identical* config, or success and cost describe different models.
+# Before running B/C, confirm the configs below match openvla_utils.py exactly:
+#   int8: load_in_8bit=True  (bnb default llm_int8_threshold=6.0)
+#   int4: load_in_4bit=True, nf4, double_quant=True, compute_dtype=bfloat16
+# If openvla_utils.py differs (e.g. a different threshold or fp32 compute), change
+# THIS file to match it, not the other way round — the eval harness defines truth.
 def load_policy(checkpoint: str, precision: str, device: str = "cuda:0"):
     common = dict(trust_remote_code=True, low_cpu_mem_usage=True,
                   attn_implementation="sdpa")  # <- Blackwell/SDPA path, no flash-attn
@@ -120,6 +130,26 @@ def load_policy(checkpoint: str, precision: str, device: str = "cuda:0"):
     vla.eval()
     processor = AutoProcessor.from_pretrained(checkpoint, trust_remote_code=True)
     return vla, processor
+
+
+def loaded_footprint_gb(model) -> float:
+    """Actual resident weight footprint of the *loaded* model, in GB.
+
+    Sums the real byte size of every parameter and buffer. For bitsandbytes this
+    captures the quantized reality the on-disk bf16 dir cannot: int8 weights are
+    stored as 1-byte tensors, nf4 weights as packed uint8 (half-byte/param) plus
+    their absmax / double-quant state buffers. This is the honest "model size"
+    metric to compare across arms A/B/C — dir_size_gb() reports the shared bf16
+    checkpoint and would be identical (and wrong) for every quantized arm.
+    """
+    seen: set[int] = set()
+    total = 0
+    for t in list(model.parameters()) + list(model.buffers()):
+        if t is None or id(t) in seen:
+            continue
+        seen.add(id(t))
+        total += t.numel() * t.element_size()
+    return total / 1e9
 
 
 def dir_size_gb(path: str) -> float:
@@ -217,7 +247,11 @@ def main():
         "precision": args.precision,
         "checkpoint": ckpt,
         "success_rate_pct": args.success_rate,     # fill from run_libero_eval
-        "model_size_gb": round(dir_size_gb(ckpt), 3),
+        # Headline size metric: actual resident weight footprint of the loaded
+        # (quantized) model — comparable across arms. dir_size_gb is the shared
+        # bf16 checkpoint on disk, kept only for reference (identical for B/C).
+        "model_size_gb": round(loaded_footprint_gb(vla), 3),
+        "disk_size_gb": round(dir_size_gb(ckpt), 3),
         **perf,
         "device": torch.cuda.get_device_name(0),
         "unnorm_key": args.unnorm_key,
