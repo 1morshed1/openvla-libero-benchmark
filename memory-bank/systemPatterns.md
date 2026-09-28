@@ -31,13 +31,13 @@ Hold **weights fixed** after Arm A; vary **only precision**. REF = harness check
 3. Avoid OFT transformers fork for run path; use base openvla action tokenization.
 4. Eval requires `--center_crop True`.
 5. Merge LoRA on same device used for eval.
-6. Freeze tasks / trials / seeds before final numbers; 3 seeds for finals.
+6. Freeze tasks / trials before final numbers. Seeds are deterministic in the LIBERO harness (fixed init states + greedy decoding) → one 500-episode run per arm; compare arms with paired McNemar.
 7. Fix MuJoCo headless (`MUJOCO_GL=egl`) before touching model.
 8. `finetune.py` keeps only the latest checkpoint by default — snapshot each save (or pass `--save_latest_checkpoint_only False`) before relying on checkpoint selection.
 9. Detached jobs die on host reboot — relaunch; long jobs need snapshot/resume discipline.
 
 ## Checkpoint selection pattern
-Dev eval (10 trials/task, seed 7) on candidate checkpoints → pick best → full frozen eval (50 × 3 seeds) on the winner only. Arm A: 20k (80%) vs 50k (86%) → 50k.
+Dev eval (10 trials/task, seed 7) on candidate checkpoints → pick best → full eval (50 trials/task, seed 7) on the winner only. Arm A: 20k (80%) vs 50k (86%) → 50k → full 86.0%.
 
 ## Metrics (identical recipe every arm)
 Success %, median latency ms (warmup + N≥100), peak mem GB, on-disk size GB, throughput act/s, **energy J/action (NVML)**.

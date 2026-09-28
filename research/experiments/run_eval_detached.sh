@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Detached Arm A eval on GPU-1.
-# Protocol: libero_spatial, 10 trials/task, seed 7, center_crop True.
-# Checkpoint: frozen snapshot of the step-20k merged bf16 weights.
+# Detached LIBERO-Spatial eval on GPU-1 (center_crop True).
+# Env: CKPT (merged checkpoint dir), TRIALS (10 dev / 50 final), SEED (7), NOTE (log tag).
+# The seed does not change outcomes — see Amendment 1 in research/datasets/libero-spatial-eval.md.
 set -euo pipefail
 GPU="${GPU:-1}"
 export CUDA_VISIBLE_DEVICES="$GPU"

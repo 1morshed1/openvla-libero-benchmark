@@ -35,3 +35,11 @@
 ## Sign-off
 
 - [x] Protocol values filled and committed. Frozen on: **2026-09-21**.
+
+## Amendment 1 (2026-09-28) — seeds are deterministic
+
+The multi-seed rule above does not produce variance. `run_libero_eval.py` loads a fixed initial state per episode index (`task_suite.get_task_init_states`) and decodes greedily (`do_sample=False`), so the seed changes nothing: Arm A seed 42 matched seed 7 on all 358 episodes compared (0 differ). Effective protocol from now on:
+
+- **One run per arm: 50 trials/task, seed 7** (500 episodes). Same 500 initial states for every arm, so arms are directly paired.
+- **Uncertainty:** binomial 95% CI on the 500 episodes (±~3 pts at 85%), and **exact McNemar** on per-episode outcomes vs the comparison arm.
+- All other settings unchanged. Approved by the user 2026-09-28.

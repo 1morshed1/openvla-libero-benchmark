@@ -35,7 +35,7 @@
 
 ## Eval protocol (FROZEN 2026-09-21 — `research/datasets/libero-spatial-eval.md`)
 - Suite: `libero_spatial`, all 10 tasks.
-- Trials/task: 50 final (10 dev); seeds: {7, 42, 123} final, 7 for dev.
+- Trials/task: 50 final (10 dev); seed 7 only — seeds are deterministic in this harness (Amendment 1, 2026-09-28). Uncertainty: binomial CI + McNemar vs comparison arm.
 - `--center_crop True`; `unnorm_key` = `libero_spatial` (REF) / `libero_spatial_no_noops` (our arms).
 - Device: RTX PRO 6000; log driver/CUDA/torch/bnb every run.
 - Throughput: ~100 episodes/hour per GPU (bf16) → full 3-seed eval ≈ 15 h.
@@ -48,5 +48,5 @@
 
 ## This git repo
 - Remote: `git@github.com:1morshed1/openvla-libero-benchmark.git`
-- Launchers in `research/experiments/`: `run_ref_full50_detached.sh`, `run_arm_a_train_detached.sh`, `run_arm_a_dev_eval_gpu2_detached.sh` (generic eval on GPU-1: CKPT/TRIALS/SEED/NOTE env vars; the `gpu2` in the name is legacy — rename after the running full eval finishes, since that loop calls it by path). All detach via `setsid nohup` to survive disconnects.
+- Launchers in `research/experiments/`: `run_ref_full50_detached.sh`, `run_arm_a_train_detached.sh`, `run_eval_detached.sh` (generic eval on GPU-1: CKPT/TRIALS/SEED/NOTE env vars). All detach via `setsid nohup` to survive disconnects.
 - Harness: `research/experiments/measure.py` (+ energy); older `scripts/metrics.py`, `scripts/run_arm.sh`, `scripts/train_arm_a.sh`.
